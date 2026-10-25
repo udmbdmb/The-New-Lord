@@ -39,6 +39,8 @@ jobs:
         run: bash scripts/android-setup.sh
       - name: Copy the game into the app
         run: npx cap sync android
+      - name: Use the same signing key every build (so updates install over the old app)
+        run: mkdir -p ~/.android && cp scripts/debug.keystore ~/.android/debug.keystore
       - name: Build the APK
         run: cd android && ./gradlew assembleDebug --no-daemon
       - uses: actions/upload-artifact@v4
