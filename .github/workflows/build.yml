@@ -11,19 +11,24 @@ env:
   ORIENTATION: fullSensor
 jobs:
   apk:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - name: Unpack the game
         run: for z in nl-part*.zip; do unzip -o -q "$z"; done
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v5
         with:
-          node-version: 20
-      - uses: actions/setup-java@v4
+          node-version: 22
+      - uses: actions/setup-java@v5
         with:
           distribution: temurin
           java-version: 17
-      - uses: android-actions/setup-android@v3
+      - name: Check the Android SDK
+        id: sdk
+        run: if [ -d "$ANDROID_HOME/platforms" ]; then echo "found=yes" >> $GITHUB_OUTPUT; echo "Android SDK at $ANDROID_HOME"; else echo "found=no" >> $GITHUB_OUTPUT; fi
+      - name: Install the Android SDK if missing
+        if: steps.sdk.outputs.found != 'yes'
+        uses: android-actions/setup-android@v3
       - name: Install Capacitor
         run: npm install
       - name: Create the Android project
@@ -41,12 +46,12 @@ jobs:
           name: TheNewLord-apk
           path: android/app/build/outputs/apk/debug/app-debug.apk
   web:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     continue-on-error: true
     environment:
       name: github-pages
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - name: Unpack the game
         run: for z in nl-part*.zip; do unzip -o -q "$z"; done
       - uses: actions/upload-pages-artifact@v3
